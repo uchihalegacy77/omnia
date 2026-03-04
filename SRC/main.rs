@@ -1,14 +1,14 @@
-// 🌌 Omni-Drive Engine: The Complete Mini-Interpreter
-// This file Lexes, Parses, and Executes Omnia code.
+// 🌌 Omni-Drive Engine: Distinct Syntax Edition
+// This engine reads the unique 'pulse' and 'emit' commands of Omnia.
 
 #[derive(Debug, PartialEq)]
 enum Token {
-    Fn, Print, OpenBrace, CloseBrace,
+    Pulse, Emit, OpenBracket, CloseBracket,
     Identifier(String), StringLiteral(String),
 }
 
 // ---------------------------------------------------------
-// 1. THE LEXER: Turns raw text into bite-sized Tokens
+// 1. THE LEXER: Translates the alien syntax
 // ---------------------------------------------------------
 fn lex(input: &str) -> Vec<Token> {
     let mut tokens = Vec::new();
@@ -16,8 +16,8 @@ fn lex(input: &str) -> Vec<Token> {
 
     while let Some(&c) = chars.peek() {
         match c {
-            '{' => { tokens.push(Token::OpenBrace); chars.next(); }
-            '}' => { tokens.push(Token::CloseBrace); chars.next(); }
+            '[' => { tokens.push(Token::OpenBracket); chars.next(); }
+            ']' => { tokens.push(Token::CloseBracket); chars.next(); }
             '"' => {
                 chars.next(); // Skip opening quote
                 let mut text = String::new();
@@ -34,55 +34,56 @@ fn lex(input: &str) -> Vec<Token> {
                     if next.is_alphabetic() { ident.push(chars.next().unwrap()); }
                     else { break; }
                 }
+                // The new Omnia unique keywords!
                 match ident.as_str() {
-                    "fn" => tokens.push(Token::Fn),
-                    "print" => tokens.push(Token::Print),
+                    "pulse" => tokens.push(Token::Pulse),
+                    "emit" => tokens.push(Token::Emit),
                     _ => tokens.push(Token::Identifier(ident)),
                 }
             }
-            _ => { chars.next(); } // Skip unknown characters
+            _ => { chars.next(); } // Skip unknown
         }
     }
     tokens
 }
 
 // ---------------------------------------------------------
-// 2. THE PARSER: Builds an Abstract Syntax Tree (AST)
+// 2. THE PARSER: Understands the structural logic
 // ---------------------------------------------------------
 #[derive(Debug)]
 enum Statement {
-    Print(String),
+    Emit(String),
 }
 
 #[derive(Debug)]
-struct Function {
+struct PulseFunction {
     name: String,
     body: Vec<Statement>,
 }
 
-fn parse(tokens: Vec<Token>) -> Vec<Function> {
+fn parse(tokens: Vec<Token>) -> Vec<PulseFunction> {
     let mut functions = Vec::new();
     let mut i = 0;
 
     while i < tokens.len() {
-        // Look for: fn <name> { ... }
-        if tokens[i] == Token::Fn {
+        // Look for: pulse <name> [ ... ]
+        if tokens[i] == Token::Pulse {
             if let Token::Identifier(ref name) = tokens[i+1] {
-                if tokens[i+2] == Token::OpenBrace {
+                if tokens[i+2] == Token::OpenBracket {
                     let mut body = Vec::new();
-                    i += 3; // Jump inside the function body
+                    i += 3; 
                     
-                    // Parse the statements inside
-                    while i < tokens.len() && tokens[i] != Token::CloseBrace {
-                        if tokens[i] == Token::Print {
+                    // Parse statements inside the brackets
+                    while i < tokens.len() && tokens[i] != Token::CloseBracket {
+                        if tokens[i] == Token::Emit {
                             if let Token::StringLiteral(ref text) = tokens[i+1] {
-                                body.push(Statement::Print(text.clone()));
-                                i += 1; // Skip the string
+                                body.push(Statement::Emit(text.clone()));
+                                i += 1; 
                             }
                         }
                         i += 1;
                     }
-                    functions.push(Function { name: name.clone(), body });
+                    functions.push(PulseFunction { name: name.clone(), body });
                 }
             }
         }
@@ -92,15 +93,15 @@ fn parse(tokens: Vec<Token>) -> Vec<Function> {
 }
 
 // ---------------------------------------------------------
-// 3. THE INTERPRETER: Executes the logic
+// 3. THE INTERPRETER: Executes the Genesis block
 // ---------------------------------------------------------
-fn run(functions: Vec<Function>) {
+fn run(functions: Vec<PulseFunction>) {
     for func in functions {
-        // Find the main function and run its contents
-        if func.name == "main" {
+        // Programs now start at 'genesis', not 'main'
+        if func.name == "genesis" {
             for stmt in func.body {
                 match stmt {
-                    Statement::Print(text) => println!("  > {}", text),
+                    Statement::Emit(text) => println!("  📡 {}", text),
                 }
             }
         }
@@ -111,25 +112,21 @@ fn run(functions: Vec<Function>) {
 // IGNITION: Tie it all together
 // ---------------------------------------------------------
 fn main() {
-    // Here is a piece of raw Omnia code!
+    // Look at how distinct and clean the Omnia language is now!
     let omnia_code = r#"
-        fn main {
-            print "Event Horizon Ignited!"
-            print "Welcome to the universe, Omnia."
-        }
+        pulse genesis [
+            emit "Signal received."
+            emit "Omnia engine is online."
+        ]
     "#;
 
     println!("🚀 Booting Omni-Drive Engine...");
     
-    // Step 1: Lex
     let tokens = lex(omnia_code);
-    
-    // Step 2: Parse
     let ast = parse(tokens);
     
-    // Step 3: Execute!
     println!("⚙️ Executing Omnia Code:\n");
     run(ast);
     
-    println!("\n✅ Process finished with zero bloat.");
+    println!("\n✅ Process finished. Zero bloat detected.");
 }
