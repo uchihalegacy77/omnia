@@ -1,0 +1,50 @@
+name: 🌌 Omni-Drive SLSA Builder
+
+on:
+  workflow_dispatch: # This lets you trigger the build manually
+  release:
+    types: [created]
+
+jobs:
+  build:
+    name: Build Engine
+    runs-on: ubuntu-latest
+    outputs:
+      hashes: ${{ steps.hash.outputs.hashes }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Compile Omni-Drive (Zero Bloat)
+        run: cargo build --release
+
+      - name: Generate SLSA Hashes
+        id: hash
+        run: |
+          # Go to the compiled folder
+          cd target/release
+          # Rename the default binary to 'omnia' for style
+          mv omnia-compiler omnia || true
+          # Hash the binary for the SLSA Generator
+          echo "hashes=$(sha256sum omnia | base64 -w0)" >> "$GITHUB_OUTPUT"
+
+      - name: Upload Compiled Binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: omnia-binary
+          path: target/release/omnia
+
+  provenance:
+    needs: [build]
+    name: Generate SLSA Certificate
+    permissions:
+      actions: read
+      id-token: write
+      contents: write
+    # This is the official Google/SLSA Generic Generator
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.0.0
+    with:
+      base64-subjects: "${{ needs.build.outputs.hashes }}"
