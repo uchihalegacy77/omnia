@@ -1,4 +1,4 @@
-Omnia
+🌌Omnia
 ​The Universal, Zero-Bloat, High-Velocity Programming Language.
 ​Infinite logic. Zero wasted space.
 ​Omnia is a multi-paradigm, statically inferred programming language designed for the modern era. It combines the instant feedback of an interpreted language with the indestructible, storage-friendly speed of raw machine code.
@@ -27,7 +27,7 @@ fn handle_traffic(req: Request) -> Result<Response, Error> {
         _   => Err(Error.NotFound)
     }
 }
-curl -sL https://omnia-lang.org/install.sh | bash
+curl -sL https://omnia-lang.com/install.sh | bash
 # Build a native, tiny binary for Windows
 omnia build app.om --target windows-x64
 
