@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Omnia | The Hybrid Syntax IDE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #050505; color: #f3f4f6; font-family: 'Courier New', Courier, monospace; overflow-x: hidden; }
+        .glow-cyan { text-shadow: 0 0 10px rgba(0, 255, 255, 0.6), 0 0 20px rgba(0, 255, 255, 0.4); }
+        .ide-panel { background: #0a0a0f; border: 1px solid #1f1f2e; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); }
+        .ide-header { background: linear-gradient(90deg, #111 0%, #1a1a24 100%); border-bottom: 1px solid #a855f7; }
+        
+        textarea { outline: none; resize: none; tab-size: 4; }
+        #console-output { white-space: pre-wrap; word-wrap: break-word; }
+        
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; border: 1px solid #111; }
+        
+        .btn-primary {
+            background: rgba(168, 85, 247, 0.15); border: 1px solid #a855f7; color: #e9d5ff;
+            transition: all 0.2s ease; box-shadow: 0 0 10px rgba(168, 85, 247, 0.2);
+        }
+        .btn-primary:hover { background: rgba(168, 85, 247, 0.4); box-shadow: 0 0 20px rgba(168, 85, 247, 0.6); color: #fff; }
+        
+        .btn-secondary {
+            background: rgba(100, 116, 139, 0.1); border: 1px solid #475569; color: #cbd5e1;
+            transition: all 0.2s ease;
+        }
+        .btn-secondary:hover { background: rgba(100, 116, 139, 0.3); color: #fff; }
+
+        .terminal-line { margin-bottom: 4px; border-left: 2px solid transparent; padding-left: 8px; }
+        .terminal-sys { color: #6b7280; }
+        .terminal-out { color: #67e8f9; border-left-color: #a855f7; background: rgba(168,85,247,0.05); }
+        .terminal-err { color: #ef4444; border-left-color: #ef4444; background: rgba(239,68,68,0.05); }
+        .terminal-success { color: #22c55e; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center">
+
+    <nav class="w-full border-b border-gray-900 bg-black/50 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="text-3xl font-bold text-[#00ffff] tracking-widest glow-cyan">OMNIA</div>
+            <div class="flex items-center gap-4">
+                <span class="text-sm text-gray-400 hidden sm:block">Web Runtime IDE v8.0</span>
+            </div>
+        </div>
+    </nav>
+
+    <main class="w-full max-w-7xl px-4 sm:px-6 py-8 flex flex-col gap-8 flex-grow">
+        
+        <header class="text-center max-w-3xl mx-auto mb-4">
+            <h1 class="text-4xl sm:text-5xl font-bold text-white mb-4">The Immutable Web Engine.</h1>
+            <p class="text-lg text-gray-400 leading-relaxed">
+                Write code that reads naturally but executes with absolute structural rigidity. Omnia compiles directly in your browser.
+            </p>
+        </header>
+
+        <!-- IDE Actions -->
+        <div class="w-full flex flex-wrap justify-between items-center gap-4 bg-gray-900/40 p-3 rounded-lg border border-gray-800">
+            <div class="flex items-center gap-3">
+                <label class="text-sm text-gray-400">Load Snippet:</label>
+                <select id="snippet-selector" class="bg-black border border-gray-700 text-cyan-300 text-sm rounded px-3 py-1 outline-none" onchange="loadSnippet()">
+                    <option value="basic">Genesis Boot</option>
+                    <option value="math">Mathematics (+, -, *, /)</option>
+                    <option value="immutable">Immutability Test</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="clearTerminal()" class="btn-secondary px-4 py-1.5 rounded text-xs font-bold uppercase tracking-wider">
+                    Clear Terminal
+                </button>
+                <button onclick="executeOmnia()" class="btn-primary px-6 py-1.5 rounded text-sm font-bold uppercase tracking-wider flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" fill-rule="evenodd"></path></svg>
+                    Compile & Run
+                </button>
+            </div>
+        </div>
+
+        <section class="w-full grid grid-cols-1 lg:grid-cols-2 gap-6">
+            
+            <!-- Code Editor -->
+            <div class="flex flex-col rounded-xl overflow-hidden border border-gray-800 ide-panel h-[500px]">
+                <div class="ide-header px-4 py-3 flex items-center gap-2 text-sm text-gray-300 font-bold tracking-wide">
+                    <span class="text-[#00ffff]">&lt;/&gt;</span> main.om
+                </div>
+                <textarea id="code-editor" class="w-full flex-grow bg-transparent text-gray-200 p-5 text-base sm:text-lg leading-relaxed font-mono" spellcheck="false"></textarea>
+            </div>
+
+            <!-- Terminal Output -->
+            <div class="flex flex-col rounded-xl overflow-hidden border border-gray-800 ide-panel h-[500px]">
+                <div class="ide-header px-4 py-3 flex items-center gap-2 text-sm text-gray-300 font-bold tracking-wide">
+                    <span class="text-purple-400">>&gt;</span> Standard Output
+                </div>
+                <div id="console-output" class="w-full flex-grow bg-transparent p-5 text-sm sm:text-base leading-relaxed font-mono overflow-y-auto">
+                    <div class="terminal-sys">// Terminal Ready. Awaiting engine ignition...</div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Syntax Reference -->
+        <section class="w-full grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4">
+            <div class="bg-gray-900/50 border border-gray-800 p-4 rounded-lg text-center">
+                <div class="text-lg sm:text-xl text-cyan-400 font-bold mb-1">sequence</div>
+                <div class="text-[10px] sm:text-xs text-gray-400 uppercase tracking-widest">Logic Entry</div>
+            </div>
+            <div class="bg-gray-900/50 border border-gray-800 p-4 rounded-lg text-center">
+                <div class="text-lg sm:text-xl text-purple-400 font-bold mb-1">[ ]</div>
+                <div class="text-[10px] sm:text-xs text-gray-400 uppercase tracking-widest">Rigid Block</div>
+            </div>
+            <div class="bg-gray-900/50 border border-gray-800 p-4 rounded-lg text-center">
+                <div class="text-lg sm:text-xl text-purple-400 font-bold mb-1">display</div>
+                <div class="text-[10px] sm:text-xs text-gray-400 uppercase tracking-widest">Output Data</div>
+            </div>
+            <div class="bg-gray-900/50 border border-gray-800 p-4 rounded-lg text-center">
+                <div class="text-lg sm:text-xl text-cyan-400 font-bold mb-1">set _ to _</div>
+                <div class="text-[10px] sm:text-xs text-gray-400 uppercase tracking-widest">Memory Lock</div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const snippets = {
+            basic: `sequence genesis [\n    display "Web Engine Initialized."\n    display "Welcome to Omnia."\n]`,
+            math: `sequence genesis [\n    set base to 500\n    set multiplier to 2\n    \n    set total to base * multiplier\n    set reduced to total - 100\n    set final to reduced / 2\n\n    display "Final computed value:"\n    display final\n]`,
+            immutable: `sequence genesis [\n    display "Testing Immutability..."\n    \n    set shield to 100\n    display "Shield is active at:"\n    display shield\n\n    // This will trigger a critical engine error:\n    set shield to 50\n]`
+        };
+
+        function loadSnippet() {
+            const selector = document.getElementById('snippet-selector').value;
+            document.getElementById('code-editor').value = snippets[selector];
+        }
+
+        function clearTerminal() {
+            document.getElementById('console-output').innerHTML = "<div class='terminal-sys'>// Terminal Cleared.</div>";
+        }
+
+        // Initialize with basic snippet
+        window.onload = loadSnippet;
+
+        async function executeOmnia() {
+            const rawCode = document.getElementById('code-editor').value;
+            const terminal = document.getElementById('console-output');
+            
+            terminal.innerHTML += `<div class='terminal-sys'>\n[${new Date().toLocaleTimeString()}] Igniting Omni-Drive Engine...</div>`;
+            
+            // Artificial delay to feel like a real compilation process
+            await new Promise(r => setTimeout(r, 400));
+
+            try {
+                // Robust Lexer
+                const tokens = [];
+                // Regex matches: sequence, display, set, to, [, ], *, +, -, /, strings with spaces, numbers, identifiers
+                const tokenRegex = /\s*(sequence|display|set|to|\[|\]|[-+*/]|"[^"]*"|[0-9]+|[a-zA-Z_][a-zA-Z0-9_]*)\s*/g;
+                let match;
+                while ((match = tokenRegex.exec(rawCode)) !== null) {
+                    if (match[1]) tokens.push(match[1]);
+                }
+
+                if(tokens.length === 0) throw new Error("No instructions provided to the engine.");
+
+                let memory = {};
+                let ptr = 0;
+                let inGenesis = false;
+
+                const getVal = (t) => {
+                    if (!t) throw new Error("Unexpected end of statement.");
+                    if (!isNaN(t)) return parseInt(t);
+                    if (t.startsWith('"')) return t.slice(1, -1);
+                    if (memory[t] !== undefined) return memory[t];
+                    throw new Error(`Memory Access Violation: '${t}' is undefined.`);
+                };
+
+                // Parser & Execution VM
+                while (ptr < tokens.length) {
+                    let t = tokens[ptr];
+
+                    if (t === 'sequence') {
+                        if (tokens[ptr+1] === 'genesis' && tokens[ptr+2] === '[') {
+                            inGenesis = true; 
+                            ptr += 3; 
+                            continue;
+                        } else {
+                            throw new Error("Syntax Error: Entry point must be 'sequence genesis ['");
+                        }
+                    }
+
+                    if (inGenesis) {
+                        if (t === ']') { inGenesis = false; ptr++; continue; }
+
+                        if (t === 'display') {
+                            if(ptr + 1 >= tokens.length) throw new Error("Syntax Error: 'display' missing target data.");
+                            let val = getVal(tokens[ptr+1]);
+                            terminal.innerHTML += `<div class='terminal-line terminal-out'><span class='text-purple-400 font-bold'>📡</span> ${val}</div>`;
+                            ptr += 2; 
+                            continue;
+                        }
+
+                        if (t === 'set') {
+                            if(ptr + 3 >= tokens.length) throw new Error("Syntax Error: Incomplete 'set' statement.");
+                            let varName = tokens[ptr+1];
+                            
+                            if(["sequence", "display", "set", "to", "[", "]"].includes(varName)) {
+                                throw new Error(`Syntax Error: Cannot use reserved keyword '${varName}' as a variable name.`);
+                            }
+
+                            if (tokens[ptr+2] === 'to') {
+                                if (memory[varName] !== undefined) {
+                                    throw new Error(`IMMUTABILITY BREACH: Variable '${varName}' is locked and cannot be overwritten.`);
+                                }
+
+                                let leftVal = getVal(tokens[ptr+3]);
+                                
+                                // Check if there's a math operation
+                                if (ptr + 5 < tokens.length && ['+', '-', '*', '/'].includes(tokens[ptr+4])) {
+                                    let operator = tokens[ptr+4];
+                                    let rightVal = getVal(tokens[ptr+5]);
+                                    
+                                    if (operator === '+') memory[varName] = leftVal + rightVal;
+                                    else if (operator === '-') memory[varName] = leftVal - rightVal;
+                                    else if (operator === '*') memory[varName] = leftVal * rightVal;
+                                    else if (operator === '/') {
+                                        if (rightVal === 0) throw new Error("Math Error: Division by zero.");
+                                        memory[varName] = Math.floor(leftVal / rightVal); // Keeping it integer-based like Rust
+                                    }
+                                    ptr += 6; 
+                                    continue;
+                                } else {
+                                    // Direct assignment
+                                    memory[varName] = leftVal;
+                                    ptr += 4; 
+                                    continue;
+                                }
+                            } else {
+                                throw new Error(`Syntax Error: Expected 'to' after variable name, found '${tokens[ptr+2]}'`);
+                            }
+                        }
+                        
+                        // If we reach here and haven't continued, it's an unhandled token inside sequence
+                        throw new Error(`Syntax Error: Unexpected token '${t}' inside sequence.`);
+                    }
+                    ptr++;
+                }
+                
+                if(inGenesis) throw new Error("Structural Error: Missing closing bracket ']' for sequence genesis.");
+
+                terminal.innerHTML += `<div class='terminal-line terminal-success'>[SYS] Execution Complete. Zero bloat detected.</div>`;
+            } catch (error) {
+                terminal.innerHTML += `<div class='terminal-line terminal-err'>[FATAL ERROR] ${error.message}</div>`;
+            }
+            
+            // Auto scroll to bottom
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+    </script>
+</body>
+</html>
+
+
