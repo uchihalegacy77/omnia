@@ -1,0 +1,11 @@
+[package]
+name = "omnia"
+version = "1.0.0"
+edition = "2021"
+authors = ["Omnia Foundation"]
+description = "The Natural Flow, Zero-Bloat, Immutable programming language."
+
+[dependencies]
+# Zero dependencies. Pure Rust. Zero Bloat.
+
+
