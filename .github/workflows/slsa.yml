@@ -1,7 +1,9 @@
 name: [OMNIA] SLSA Builder V1.0
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [ "main" ]  # <--- THE FIX: This makes it run automatically!
+  workflow_dispatch:      # This allows you to run it manually if needed
   release:
     types: [created]
 
@@ -21,14 +23,15 @@ jobs:
       - name: Compile Omni-Drive Engine
         run: cargo build --release
 
-      - name: Generate SLSA Hashes
+      - name: Generate Security Hashes
         id: hash
         run: |
           cd target/release
-          mv omnia omnia-engine || true
+          # Failsafe copy to ensure the file exists for hashing
+          cp omnia omnia-engine
           echo "hashes=$(sha256sum omnia-engine | base64 -w0)" >> "$GITHUB_OUTPUT"
 
-      - name: Upload Binary
+      - name: Upload Engine Binary
         uses: actions/upload-artifact@v4
         with:
           name: omnia-engine
