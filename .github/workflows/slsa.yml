@@ -2,8 +2,8 @@ name: [OMNIA] SLSA Builder V1.0
 
 on:
   push:
-    branches: [ "main" ]  # <--- THE FIX: This makes it run automatically!
-  workflow_dispatch:      # This allows you to run it manually if needed
+    branches: [ "main" ]
+  workflow_dispatch:
   release:
     types: [created]
 
@@ -26,9 +26,18 @@ jobs:
       - name: Generate Security Hashes
         id: hash
         run: |
+          set -e
           cd target/release
-          # Failsafe copy to ensure the file exists for hashing
-          cp omnia omnia-engine
+          
+          # Verify binary exists
+          BINARY_NAME="omnia"  # CHANGE THIS to match your Cargo.toml
+          if [ ! -f "$BINARY_NAME" ]; then
+            echo "Error: Binary '$BINARY_NAME' not found"
+            exit 1
+          fi
+          
+          # Failsafe copy
+          cp "$BINARY_NAME" omnia-engine
           echo "hashes=$(sha256sum omnia-engine | base64 -w0)" >> "$GITHUB_OUTPUT"
 
       - name: Upload Engine Binary
