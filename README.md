@@ -1,34 +1,33 @@
-🌌 Omnia
-Natural Flow. Rigid Structure. Immutable Core.
-Omnia balances the human need for highly readable code with the engineering necessity of strict architectural containment. It uses a hybrid syntax that reads smoothly like an English instruction manual, but utilizes rigid [ ] brackets to guarantee visual structure and editor compatibility.
-🌐 The Standalone IDE
-You do not need to install anything to use Omnia.
-Omnia is fully decentralized. The compiler engine runs natively in our web infrastructure. You can write, compile, and execute code directly in your browser using the official Web IDE:
+[OMNIA]: The Universal Architecture
+Infinite Precision. Dimensional Scoping. Pure ASCII Core.
+Omnia V1.0 bridges the gap between today's technology and bare-metal OS design. It utilizes Infinite Precision Mathematics to shatter hardware limits, Dimensional Scoping to prevent memory leaks, and a purely ASCII output system to guarantee zero font-rendering bloat.
+[WEB] The Enterprise Web IDE
+Omnia runs natively in the cloud. The Web Engine utilizes BigInt architecture to calculate infinite numbers cleanly.
 Enter the Web Hub: omnia-lang.com
-🚀 The Hybrid Syntax
+[CORE] The Universal Syntax
+Omnia seamlessly fuses cosmic-scale mathematics with real-world hardware interactions.
 sequence genesis [
-    display "Signal received."
+    // Infinite Precision Mathematics (No overflow, ever)
+    set cosmic_scale to 999999999999999999999999999999999999
+    set multiplier to 1000000000000000000000000000000000000
     
-    set base_power to 1000
-    set multiplier to 2
+    set total_atoms to cosmic_scale * multiplier
+    display "Calculated universe mass:"
+    display total_atoms
     
-    set max_power to base_power * multiplier
-    set final_output to max_power - 100
-    
-    display "Maximum power locked at:"
-    display final_output
+    // Host Interoperability (Talking to today's tech)
+    invoke "host.glow" with "#00ffff"
 ]
 
 The Reference
- * sequence: Starts an orderly chain of logic (replaces function).
- * [ ]: Provides rigid containment fields for sequences. Essential for structural parsing.
- * display: Broadcasts data to the standard output.
- * set _ to _: Sets data into an indestructible memory lock. Once bound, variables in Omnia cannot be mutated.
- * Math Operators: Omnia fully supports +, -, *, and / for mathematical fusion.
-⚙️ For Desktop Contributors (Rust)
-While the Web IDE is the primary interface, the underlying engine is written in pure, zero-dependency Rust for operating system deployments.
- * Run locally: cargo run
- * Build binary: cargo build --release
-🛡️ SLSA Level 3 Infrastructure
-Every Rust binary created by this repository is cryptographically signed and hashed via Google's SLSA framework, ensuring absolute supply-chain security.
-
+ * sequence name [ ]: Defines a discrete execution environment.
+ * set _ to _: Creates a strictly immutable memory lock.
+ * evolve _ to _: Explicitly transitions a variable's state across cycles.
+ * assess _ [ ]: Evaluates a structural condition.
+ * fallback [ ]: The secondary logic path.
+ * cycle _ [ ]: Executes a block repeatedly within its own memory dimension.
+ * invoke _ with _: Bridges the Omnia engine with external, native host capabilities.
+[SYS] Infinite Mathematics
+The engine has abandoned standard 32/64-bit constraints. It parses all numeric values as dynamically scaling objects, ensuring mathematical operations can scale to infinity without overflow vulnerabilities.
+[SEC] SLSA Level 3 Infrastructure
+Every binary is cryptographically signed via Google's SLSA framework.
