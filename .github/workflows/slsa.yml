@@ -1,4 +1,4 @@
-name: 🌌 Omni-Drive SLSA Builder
+name: [OMNIA] SLSA Builder V1.0
 
 on:
   workflow_dispatch:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    name: Build Immutable Engine
+    name: Build Universal Engine
     runs-on: ubuntu-latest
     outputs:
       hashes: ${{ steps.hash.outputs.hashes }}
@@ -44,5 +44,3 @@ jobs:
     uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.0.0
     with:
       base64-subjects: "${{ needs.build.outputs.hashes }}"
-
-
