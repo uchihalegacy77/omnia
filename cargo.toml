@@ -1,11 +1,10 @@
 [package]
 name = "omnia"
-version = "1.0.0"
-edition = "2021"
+# Publicly, this is V1.0. Internally, we know the journey it took.
+version = "1.0.0" 
+edition = "2026"
 authors = ["Omnia Foundation"]
-description = "The Natural Flow, Zero-Bloat, Immutable programming language."
+description = "The Universal Architecture: Pure ASCII, Zero-Bloat, Infinite Math."
 
 [dependencies]
-# Zero dependencies. Pure Rust. Zero Bloat.
-
-
+# Zero dependencies. Pure Rust. Zero Bloat. Eternal lifespan.
