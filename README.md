@@ -6,7 +6,6 @@ Omnia runs natively in the cloud. The Web Engine utilizes BigInt architecture to
 Enter the Web Hub: omnia-lang.com
 [CORE] The Universal Syntax
 Omnia seamlessly fuses cosmic-scale mathematics with real-world hardware interactions.
-
 sequence genesis [
     // Infinite Precision Mathematics (No overflow, ever)
     set cosmic_scale to 999999999999999999999999999999999999
