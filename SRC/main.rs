@@ -125,7 +125,8 @@ impl Parser {
     fn parse_expr(&mut self) -> Expr {
         let left = self.parse_primary();
         if let Some(tok) = self.current() {
-            if matches!(tok, Token::Plus | Token::Minus | Token::Star | Token::Slash | Token::EqEq | Token::NotEq | Token::Lt | Token::Gt) {
+            // FIX: Added * dereference operator to correctly match the token reference
+            if matches!(*tok, Token::Plus | Token::Minus | Token::Star | Token::Slash | Token::EqEq | Token::NotEq | Token::Lt | Token::Gt) {
                 let op = self.consume().unwrap();
                 let right = self.parse_primary();
                 return match op {
@@ -273,7 +274,9 @@ fn evaluate(expr: &Expr, env: &Environment) -> Value {
         },
         Expr::Sub(l, r) => if let (Value::Num(a), Value::Num(b)) = (evaluate(l, env), evaluate(r, env)) { Value::Num(a - b) } else { abort("[OMNIA-ERR-14] Math Error") },
         Expr::Mul(l, r) => if let (Value::Num(a), Value::Num(b)) = (evaluate(l, env), evaluate(r, env)) { Value::Num(a * b) } else { abort("[OMNIA-ERR-15] Math Error") },
-        Expr::Div(l, r) => if let (Value::Num(a), Value::Num(b)) = (evaluate(l, env), evaluate(r, env)) { if b==0 { abort("[OMNIA-ERR-16] Math Error: Div by 0")} Value::Num(a / b) } else { abort("[OMNIA-ERR-17] Math Error") },
+        
+        // FIX: Added missing semicolon after the abort statement to satisfy Rust's expression rules
+        Expr::Div(l, r) => if let (Value::Num(a), Value::Num(b)) = (evaluate(l, env), evaluate(r, env)) { if b==0 { abort("[OMNIA-ERR-16] Math Error: Div by 0"); } Value::Num(a / b) } else { abort("[OMNIA-ERR-17] Math Error") },
         
         Expr::Eq(l, r) => if let (Value::Num(a), Value::Num(b)) = (evaluate(l, env), evaluate(r, env)) { Value::Bool(a == b) } else { abort("[OMNIA-ERR-18] Type Error") },
         Expr::Neq(l, r) => if let (Value::Num(a), Value::Num(b)) = (evaluate(l, env), evaluate(r, env)) { Value::Bool(a != b) } else { abort("[OMNIA-ERR-18] Type Error") },
@@ -334,3 +337,5 @@ fn main() {
     run_block(&ast, &mut memory);
     println!("\n[OK] Process Complete. Interoperability successful.");
 }
+
+
