@@ -125,8 +125,7 @@ impl Parser {
     fn parse_expr(&mut self) -> Expr {
         let left = self.parse_primary();
         if let Some(tok) = self.current() {
-            // FIX: Added * dereference operator to correctly match the token reference
-            if matches!(*tok, Token::Plus | Token::Minus | Token::Star | Token::Slash | Token::EqEq | Token::NotEq | Token::Lt | Token::Gt) {
+            if matches!(tok, Token::Plus | Token::Minus | Token::Star | Token::Slash | Token::EqEq | Token::NotEq | Token::Lt | Token::Gt) {
                 let op = self.consume().unwrap();
                 let right = self.parse_primary();
                 return match op {
@@ -262,26 +261,28 @@ fn evaluate(expr: &Expr, env: &Environment) -> Value {
     match expr {
         Expr::Num(n) => Value::Num(*n),
         Expr::Text(t) => Value::Text(t.clone()),
-        Expr::Variable(id) => env.get(id).unwrap_or_else(|| abort(&format!("[OMNIA-ERR-12] Memory Error: '{}' is undefined in this dimension.", id))),
+        Expr::Variable(id) => env.get(id.as_str()).unwrap_or_else(|| abort(&format!("[OMNIA-ERR-12] Memory Error: '{}' is undefined in this dimension.", id))),
         
         // Polymorphic Data Fusion (Safely combining Text and Numbers)
-        Expr::Add(l, r) => match (evaluate(l, env), evaluate(r, env)) {
+        Expr::Add(l, r) => match (evaluate(l.as_ref(), env), evaluate(r.as_ref(), env)) {
             (Value::Num(a), Value::Num(b)) => Value::Num(a + b),
             (Value::Text(a), Value::Text(b)) => Value::Text(format!("{}{}", a, b)),
             (Value::Text(a), Value::Num(b)) => Value::Text(format!("{}{}", a, b)),
             (Value::Num(a), Value::Text(b)) => Value::Text(format!("{}{}", a, b)),
             _ => abort("[OMNIA-ERR-13] Type Error: Cannot fuse these types."),
         },
-        Expr::Sub(l, r) => if let (Value::Num(a), Value::Num(b)) = (evaluate(l, env), evaluate(r, env)) { Value::Num(a - b) } else { abort("[OMNIA-ERR-14] Math Error") },
-        Expr::Mul(l, r) => if let (Value::Num(a), Value::Num(b)) = (evaluate(l, env), evaluate(r, env)) { Value::Num(a * b) } else { abort("[OMNIA-ERR-15] Math Error") },
+        Expr::Sub(l, r) => if let (Value::Num(a), Value::Num(b)) = (evaluate(l.as_ref(), env), evaluate(r.as_ref(), env)) { Value::Num(a - b) } else { abort("[OMNIA-ERR-14] Math Error") },
+        Expr::Mul(l, r) => if let (Value::Num(a), Value::Num(b)) = (evaluate(l.as_ref(), env), evaluate(r.as_ref(), env)) { Value::Num(a * b) } else { abort("[OMNIA-ERR-15] Math Error") },
         
-        // FIX: Added missing semicolon after the abort statement to satisfy Rust's expression rules
-        Expr::Div(l, r) => if let (Value::Num(a), Value::Num(b)) = (evaluate(l, env), evaluate(r, env)) { if b==0 { abort("[OMNIA-ERR-16] Math Error: Div by 0"); } Value::Num(a / b) } else { abort("[OMNIA-ERR-17] Math Error") },
+        Expr::Div(l, r) => if let (Value::Num(a), Value::Num(b)) = (evaluate(l.as_ref(), env), evaluate(r.as_ref(), env)) { 
+            if b == 0 { abort("[OMNIA-ERR-16] Math Error: Div by 0"); } 
+            Value::Num(a / b) 
+        } else { abort("[OMNIA-ERR-17] Math Error") },
         
-        Expr::Eq(l, r) => if let (Value::Num(a), Value::Num(b)) = (evaluate(l, env), evaluate(r, env)) { Value::Bool(a == b) } else { abort("[OMNIA-ERR-18] Type Error") },
-        Expr::Neq(l, r) => if let (Value::Num(a), Value::Num(b)) = (evaluate(l, env), evaluate(r, env)) { Value::Bool(a != b) } else { abort("[OMNIA-ERR-18] Type Error") },
-        Expr::Lt(l, r) => if let (Value::Num(a), Value::Num(b)) = (evaluate(l, env), evaluate(r, env)) { Value::Bool(a < b) } else { abort("[OMNIA-ERR-18] Type Error") },
-        Expr::Gt(l, r) => if let (Value::Num(a), Value::Num(b)) = (evaluate(l, env), evaluate(r, env)) { Value::Bool(a > b) } else { abort("[OMNIA-ERR-18] Type Error") },
+        Expr::Eq(l, r) => if let (Value::Num(a), Value::Num(b)) = (evaluate(l.as_ref(), env), evaluate(r.as_ref(), env)) { Value::Bool(a == b) } else { abort("[OMNIA-ERR-18] Type Error") },
+        Expr::Neq(l, r) => if let (Value::Num(a), Value::Num(b)) = (evaluate(l.as_ref(), env), evaluate(r.as_ref(), env)) { Value::Bool(a != b) } else { abort("[OMNIA-ERR-18] Type Error") },
+        Expr::Lt(l, r) => if let (Value::Num(a), Value::Num(b)) = (evaluate(l.as_ref(), env), evaluate(r.as_ref(), env)) { Value::Bool(a < b) } else { abort("[OMNIA-ERR-18] Type Error") },
+        Expr::Gt(l, r) => if let (Value::Num(a), Value::Num(b)) = (evaluate(l.as_ref(), env), evaluate(r.as_ref(), env)) { Value::Bool(a > b) } else { abort("[OMNIA-ERR-18] Type Error") },
     }
 }
 
