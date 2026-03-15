@@ -1,0 +1,58 @@
+name: [OMNIA] SLSA Builder V1.0
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+  release:
+    types: [created]
+
+jobs:
+  build:
+    name: Build Universal Engine
+    runs-on: ubuntu-latest
+    outputs:
+      hashes: ${{ steps.hash.outputs.hashes }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Compile Omni-Drive Engine
+        run: cargo build --release
+
+      - name: Generate Security Hashes
+        id: hash
+        run: |
+          set -e
+          cd target/release
+          
+          # Verify binary exists
+          BINARY_NAME="omnia"  # CHANGE THIS to match your Cargo.toml
+          if [ ! -f "$BINARY_NAME" ]; then
+            echo "Error: Binary '$BINARY_NAME' not found"
+            exit 1
+          fi
+          
+          # Failsafe copy
+          cp "$BINARY_NAME" omnia-engine
+          echo "hashes=$(sha256sum omnia-engine | base64 -w0)" >> "$GITHUB_OUTPUT"
+
+      - name: Upload Engine Binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: omnia-engine
+          path: target/release/omnia-engine
+
+  provenance:
+    needs: [build]
+    name: Generate Cryptographic Certificate
+    permissions:
+      actions: read
+      id-token: write
+      contents: write
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.0.0
+    with:
+      base64-subjects: "${{ needs.build.outputs.hashes }}"
