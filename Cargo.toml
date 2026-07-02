@@ -1,9 +1,32 @@
 [package]
 name = "omnia"
-version = "1.0.0" 
+version = "1.0.0"
 edition = "2021"
 authors = ["Omnia Foundation"]
 description = "The Universal Architecture: Pure ASCII, Zero-Bloat, Infinite Math."
+license = "MIT"
+repository = "https://github.com/uchihalegacy77/omnia"
+readme = "README.md"
+
+[lib]
+name = "omnia"
+path = "src/lib.rs"
+
+[[bin]]
+name = "omnia"
+path = "src/main.rs"
 
 [dependencies]
-# Zero dependencies. Pure Rust. Zero Bloat. Eternal lifespan.
+# Zero external dependencies. Pure Rust. Zero Bloat. Eternal lifespan.
+
+[dev-dependencies]
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
+
+[profile.dev]
+opt-level = 1
+debug = true
