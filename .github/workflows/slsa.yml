@@ -7,6 +7,10 @@ on:
   release:
     types: [created]
 
+env:
+  BINARY_NAME: omnia
+  RELEASE_BINARY_PATH: target/release/omnia
+
 jobs:
   build:
     name: Build Universal Engine
@@ -27,24 +31,21 @@ jobs:
         id: hash
         run: |
           set -e
-          cd target/release
           
-          # Verify binary exists
-          BINARY_NAME="omnia"  # CHANGE THIS to match your Cargo.toml
-          if [ ! -f "$BINARY_NAME" ]; then
-            echo "Error: Binary '$BINARY_NAME' not found"
+          # Verify binary exists before processing
+          if [ ! -f "${{ env.RELEASE_BINARY_PATH }}" ]; then
+            echo "Error: Binary not found at ${{ env.RELEASE_BINARY_PATH }}"
             exit 1
           fi
           
-          # Failsafe copy
-          cp "$BINARY_NAME" omnia-engine
-          echo "hashes=$(sha256sum omnia-engine | base64 -w0)" >> "$GITHUB_OUTPUT"
+          # Generate hash directly from source
+          echo "hashes=$(sha256sum ${{ env.RELEASE_BINARY_PATH }} | base64 -w0)" >> "$GITHUB_OUTPUT"
 
       - name: Upload Engine Binary
         uses: actions/upload-artifact@v4
         with:
           name: omnia-engine
-          path: target/release/omnia-engine
+          path: ${{ env.RELEASE_BINARY_PATH }}
 
   provenance:
     needs: [build]
