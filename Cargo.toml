@@ -1,0 +1,9 @@
+[package]
+name = "omnia"
+version = "1.0.0" 
+edition = "2021"
+authors = ["Omnia Foundation"]
+description = "The Universal Architecture: Pure ASCII, Zero-Bloat, Infinite Math."
+
+[dependencies]
+# Zero dependencies. Pure Rust. Zero Bloat. Eternal lifespan.
